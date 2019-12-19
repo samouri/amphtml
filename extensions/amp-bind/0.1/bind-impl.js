@@ -117,6 +117,9 @@ export class Bind {
    * @param {!Window=} opt_win
    */
   constructor(ampdoc, opt_win) {
+    console.log(
+      `JAKE bind-impl initialization started: ${Date.now() - window.start}`
+    );
     // TODO(#22733): remove opt_win subroooting once ampdoc-fie is launched.
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
@@ -214,7 +217,12 @@ export class Bind {
       })
       .then(root => {
         return this.initialize_(root);
-      });
+      })
+      .then(() =>
+        console.log(
+          `JAKE bind-impl initialization ended: ${Date.now() - window.start}`
+        )
+      );
 
     /** @const @private {!Deferred} */
     this.addMacrosDeferred_ = new Deferred();

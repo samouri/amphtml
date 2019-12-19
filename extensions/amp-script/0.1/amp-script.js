@@ -72,6 +72,9 @@ export class AmpScript extends AMP.BaseElement {
    * @param {!Element} element
    */
   constructor(element) {
+    console.log(
+      `JAKE amp-script initialization started: ${Date.now() - window.start}`
+    );
     super(element);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
@@ -224,11 +227,20 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
-    WorkerDOM.upgrade(this.element, workerAndAuthorScripts, config).then(
-      workerDom => {
+    WorkerDOM.upgrade(this.element, workerAndAuthorScripts, config)
+      .then(workerDom => {
         this.workerDom_ = workerDom;
-      }
-    );
+      })
+      .then(() =>
+        console.log(
+          `JAKE amp-script completed upgrading: ${Date.now() - window.start}`
+        )
+      );
+      workerAndAuthorScripts.then(
+        console.log(
+          `JAKE amp-script retrieved workerAndAuthorScripts: ${Date.now() - window.start}`
+        ) 
+      );
     return workerAndAuthorScripts;
   }
 
@@ -652,7 +664,7 @@ export class SanitizerImpl {
           });
           if (state) {
             // Only evaluate updates in case of recent user interaction.
-            const skipEval = !this.userActivationTracker_.isActive();
+            const skipEval = !this.userActivationTracker_.isActive() && false;
             if (skipEval) {
               user().warn(
                 TAG,
