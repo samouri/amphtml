@@ -101,6 +101,8 @@ export class AmpScript extends AMP.BaseElement {
      * @private {boolean}
      */
     this.development_ = false;
+
+    // this.workerScript = this.getWorkerScript_();
   }
 
   /** @override */
@@ -174,8 +176,19 @@ export class AmpScript extends AMP.BaseElement {
     }
 
     const workerAndAuthorScripts = Promise.all([
-      this.getWorkerScript_(),
-      authorScriptPromise,
+      this.getWorkerScript_().then(
+      // this.workerScript.then(
+        resp => {
+          // console.log(`JAKE finished downloading WORKER scripts at ${Date.now() - window.start}`);
+          return resp;
+        }
+      ),
+      authorScriptPromise.then(
+        resp => {
+          // console.log(`JAKE finished downloading AUTHOR scripts at ${Date.now() - window.start}`);
+          return resp;
+        }
+      ),
     ]).then(results => {
       const workerScript = results[0];
       const authorScript = results[1];
@@ -195,6 +208,9 @@ export class AmpScript extends AMP.BaseElement {
         return [];
       }
       return [workerScript, authorScript];
+    }).then(resp => {
+      // console.log(`JAKE finished downloading scripts at ${Date.now() - window.start}`)
+      return resp;
     });
 
     const sandbox = this.element.getAttribute('sandbox') || '';
@@ -227,6 +243,9 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
+    // console.log(
+    //   `JAKE amp-script begun upgrading: ${Date.now() - window.start}`
+    // );
     WorkerDOM.upgrade(this.element, workerAndAuthorScripts, config)
       .then(workerDom => {
         this.workerDom_ = workerDom;
@@ -236,11 +255,7 @@ export class AmpScript extends AMP.BaseElement {
           `JAKE amp-script completed upgrading: ${Date.now() - window.start}`
         )
       );
-      workerAndAuthorScripts.then(
-        console.log(
-          `JAKE amp-script retrieved workerAndAuthorScripts: ${Date.now() - window.start}`
-        ) 
-      );
+
     return workerAndAuthorScripts;
   }
 
@@ -262,7 +277,14 @@ export class AmpScript extends AMP.BaseElement {
       useLocal
     );
     const xhr = Services.xhrFor(this.win);
-    return xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text());
+    // console.log(`JAKE fetching worker URL: ${workerUrl} at ${Date.now() - window.start}`);
+    return xhr.fetchText(workerUrl, {ampCors: false}).then(r => { 
+      // console.log(`JAKE got response for worker, now going to get the .text() at ${Date.now() - window.start}`);
+      return r.text().then(txt => {
+        // console.log(`JAKE got txt response for worker, at ${Date.now() - window.start}`);
+        return txt;
+      })
+    });
   }
 
   /**

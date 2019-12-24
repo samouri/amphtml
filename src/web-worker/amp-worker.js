@@ -47,7 +47,9 @@ export function invokeWebWorker(win, method, opt_args, opt_localWin) {
     return Promise.reject('Worker not supported in window.');
   }
   registerServiceBuilder(win, 'amp-worker', AmpWorker);
+  console.log(`JAKE: registerServiceBuilder completed at ${Date.now() - window.start}`);
   const worker = getService(win, 'amp-worker');
+  console.log(`JAKE: getService completed at: ${Date.now() - window.start}`);
   return worker.sendMessage_(method, opt_args || [], opt_localWin);
 }
 
@@ -70,6 +72,7 @@ class AmpWorker {
    * @param {!Window} win
    */
   constructor(win) {
+    console.log(`JAKE ampworker-impl at ${Date.now() - window.start}`);
     /** @const @private {!Window} */
     this.win_ = win;
 
@@ -84,24 +87,35 @@ class AmpWorker {
     // Use RTV to make sure we fetch prod/canary/experiment correctly.
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
+    console.log(`JAKE ampworker-impl before calc at ${Date.now() - window.start}`);
     const url = calculateEntryPointScriptUrl(
       loc,
       'ww',
       useLocal,
       useRtvVersion
     );
+    console.log(`JAKE ampworker-impl after calculate at ${Date.now() - window.start}`);
     dev().fine(TAG, 'Fetching web worker from', url);
 
     /** @private {Worker} */
     this.worker_ = null;
 
+    console.log(`JAKE ampworker-impl FETCHING w/ fetchText at ${Date.now() - window.start}`);
     /** @const @private {!Promise} */
     this.fetchPromise_ = this.xhr_
       .fetchText(url, {
         ampCors: false,
         bypassInterceptorForDev: getMode().localDev,
       })
+      .then((x) => {
+        console.log(`JAKE FETCHED RESP ww at ${Date.now() - window.start }`)
+        return x;
+      })
       .then(res => res.text())
+      .then((x) => {
+        console.log(`JAKE DONE FETCHING ww at ${Date.now() - window.start }`)
+        return x;
+      })
       .then(text => {
         // Workaround since Worker constructor only accepts same origin URLs.
         const blob = new win.Blob([text + '\n//# sourceurl=' + url], {
@@ -110,6 +124,8 @@ class AmpWorker {
         const blobUrl = win.URL.createObjectURL(blob);
         this.worker_ = new win.Worker(blobUrl);
         this.worker_.onmessage = this.receiveMessage_.bind(this);
+      }).then(() =>  {
+        console.log(`JAKE done creating bind worker at ${Date.now() - window.start }`) 
       });
 
     /**

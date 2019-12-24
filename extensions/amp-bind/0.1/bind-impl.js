@@ -216,6 +216,7 @@ export class Bind {
         }
       })
       .then(root => {
+        console.log(`JAKE bind-impl initialize func called: ${Date.now() - window.start}`);
         return this.initialize_(root);
       })
       .then(() =>
@@ -587,6 +588,7 @@ export class Bind {
     // that should be initialized with the same `allowUrlProperties` value.
     return this.ww_('bind.init', [allowUrlProperties])
       .then(() => {
+        console.log(`JAKE: bind.init completed at ${Date.now() - window.start}`);
         return Promise.all([
           this.addMacros_().then(() => this.addMacrosDeferred_.resolve()),
           this.addBindingsForNodes_([root]),
@@ -594,6 +596,7 @@ export class Bind {
       })
       .then(() => {
         // Listen for DOM updates (e.g. template render) to rescan for bindings.
+        console.log(`JAKE: macros and bindings added for nodes at ${Date.now() - window.start}`);
         root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
       })
       .then(() => {
@@ -609,6 +612,7 @@ export class Bind {
         return Promise.all(whenParsed);
       })
       .then(() => {
+        console.log(`JAKE: amp-states have been processed! at ${Date.now() - window.start}`);
         // Bind is "ready" when its initialization completes _and_ all <amp-state>
         // elements' local data is parsed and processed (not remote data).
         this.viewer_.sendMessage('bindReady', undefined);
