@@ -36,6 +36,7 @@ import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Encode} from '../../../src/utils/bytes';
+import {ampScriptWorker} from '../../../build/amp-script-worker-0.1.js'
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -277,13 +278,10 @@ export class AmpScript extends AMP.BaseElement {
       useLocal
     );
     const xhr = Services.xhrFor(this.win);
-    // console.log(`JAKE fetching worker URL: ${workerUrl} at ${Date.now() - window.start}`);
-    return xhr.fetchText(workerUrl, {ampCors: false}).then(r => { 
-      // console.log(`JAKE got response for worker, now going to get the .text() at ${Date.now() - window.start}`);
-      return r.text().then(txt => {
-        // console.log(`JAKE got txt response for worker, at ${Date.now() - window.start}`);
-        return txt;
-      })
+    console.log(`JAKE fetching worker URL: ${workerUrl} at ${Date.now() - window.start}`);
+    return Promise.resolve(ampScriptWorker).then(txt => {
+      console.log(`JAKE done fetching worker, at ${Date.now() - window.start}`); 
+      return txt;
     });
   }
 
