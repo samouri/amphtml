@@ -6,7 +6,6 @@
 2.32 kB   |     790 B   |     469 B   |   examiner.js / examiner.max.js
 2.01 MB   |    255 kB   |   80.8 kB   |   shadow-v0.js / amp-shadow.js
 2.03 MB   |    249 kB   |   78.9 kB   |   v0.js / amp.js
- 217 kB   |   37.8 kB   |   11.8 kB   |   ww.js / ww.max.js
  397 kB   |     14 kB   |   6.08 kB   |   v0/amp-3d-gltf-0.1.js
  607 kB   |   49.3 kB   |   15.4 kB   |   v0/amp-3q-player-0.1.js
  603 kB   |   48.8 kB   |   16.2 kB   |   v0/amp-access-0.1.js

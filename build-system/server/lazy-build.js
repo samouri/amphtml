@@ -95,7 +95,6 @@ async function lazyBuildJs(req, res, next) {
  */
 async function preBuildRuntimeFiles() {
   await build(jsBundles, 'amp.js', doBuildJs);
-  await build(jsBundles, 'ww.max.js', doBuildJs);
 }
 
 /**

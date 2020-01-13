@@ -16,9 +16,18 @@
 
 import {ModeDef, getMode} from '../mode';
 import {Services} from '../services';
-import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev, devAssert} from '../log';
 import {getService, registerServiceBuilder} from '../service';
+
+import {workerJs as maxWorkerJs} from '../../build/ww.max.js';
+import {workerJs as minWorkerJs} from '../../build/ww.js';
+
+let workerJs;
+if (getMode().minified) {
+  workerJs = minWorkerJs;
+} else {
+  workerJs = maxWorkerJs;
+}
 
 const TAG = 'web-worker';
 
@@ -73,44 +82,19 @@ class AmpWorker {
     /** @const @private {!Window} */
     this.win_ = win;
 
-    /** @const @private {!../service/xhr-impl.Xhr} */
-    this.xhr_ = Services.xhrFor(win);
-
     // Use `testLocation` for testing with iframes. @see testing/iframe.js.
     let loc = win.location;
     if (getMode().test && win.testLocation) {
       loc = win.testLocation;
     }
-    // Use RTV to make sure we fetch prod/canary/experiment correctly.
-    const useLocal = getMode().localDev || getMode().test;
-    const useRtvVersion = !useLocal;
-    const url = calculateEntryPointScriptUrl(
-      loc,
-      'ww',
-      useLocal,
-      useRtvVersion
-    );
-    dev().fine(TAG, 'Fetching web worker from', url);
 
-    /** @private {Worker} */
-    this.worker_ = null;
+    // TODO(friedj): are we still fetching prod/canary/experiment correctly?
 
-    /** @const @private {!Promise} */
-    this.fetchPromise_ = this.xhr_
-      .fetchText(url, {
-        ampCors: false,
-        bypassInterceptorForDev: getMode().localDev,
-      })
-      .then(res => res.text())
-      .then(text => {
-        // Workaround since Worker constructor only accepts same origin URLs.
-        const blob = new win.Blob([text + '\n//# sourceurl=' + url], {
-          type: 'text/javascript',
-        });
-        const blobUrl = win.URL.createObjectURL(blob);
-        this.worker_ = new win.Worker(blobUrl);
-        this.worker_.onmessage = this.receiveMessage_.bind(this);
-      });
+    // Workaround since Worker constructor only accepts same origin URLs.
+    const blob = new win.Blob([workerJs], {type: 'text/javascript'});
+    const blobUrl = win.URL.createObjectURL(blob);
+    this.worker_ = new win.Worker(blobUrl);
+    this.worker_.onmessage = this.receiveMessage_.bind(this);
 
     /**
      * Array of in-flight messages pending response from worker.
@@ -143,21 +127,19 @@ class AmpWorker {
    * @restricted
    */
   sendMessage_(method, args, opt_localWin) {
-    return this.fetchPromise_.then(() => {
-      return new Promise((resolve, reject) => {
-        const id = this.counter_++;
-        this.messages_[id] = {method, resolve, reject};
+    return new Promise((resolve, reject) => {
+      const id = this.counter_++;
+      this.messages_[id] = {method, resolve, reject};
 
-        const scope = this.idForWindow_(opt_localWin || this.win_);
+      const scope = this.idForWindow_(opt_localWin || this.win_);
 
-        const message = /** @type {ToWorkerMessageDef} */ ({
-          method,
-          args,
-          scope,
-          id,
-        });
-        this.worker_./*OK*/ postMessage(message);
+      const message = /** @type {ToWorkerMessageDef} */ ({
+        method,
+        args,
+        scope,
+        id,
       });
+      this.worker_./*OK*/ postMessage(message);
     });
   }
 
@@ -214,13 +196,5 @@ class AmpWorker {
     } else {
       return this.windows_.push(win) - 1;
     }
-  }
-
-  /**
-   * @return {!Promise}
-   * @visibleForTesting
-   */
-  fetchPromiseForTesting() {
-    return this.fetchPromise_;
   }
 }

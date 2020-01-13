@@ -61,17 +61,6 @@ exports.jsBundles = {
       minifiedName: 'examiner.js',
     },
   },
-  'ww.max.js': {
-    srcDir: './src/web-worker/',
-    srcFilename: 'web-worker.js',
-    destDir: './dist',
-    minifiedDestDir: './dist',
-    options: {
-      toName: 'ww.max.js',
-      minifiedName: 'ww.js',
-      includePolyfills: true,
-    },
-  },
   'integration.js': {
     srcDir: './3p/',
     srcFilename: 'integration.js',

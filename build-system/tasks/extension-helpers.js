@@ -481,6 +481,33 @@ function buildExtensionCss(path, name, version, options) {
  * @return {!Promise}
  */
 async function buildExtensionJs(path, name, version, latestVersion, options) {
+  if (name === 'amp-script') {
+    // Copy @ampproject/worker-dom/dist/amp/worker/worker.js to dist/ folder.
+    const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
+    const file = `dist/v0/amp-script-worker-${version}`;
+    // The "js" output is minified and transpiled to ES5.
+    fs.copyFileSync(dir + 'worker.js', `${file}.js`);
+    // The "mjs" output is unminified ES6 and has debugging flags enabled.
+    fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
+  } else if (name === 'amp-bind') {
+    // Create an inlineable ww.js.
+    await compileJs('src/web-worker', 'web-worker.js', './build', {
+      toName: 'web-worker.max.js',
+      minifiedName: `web-worker.js`,
+      includePolyfills: true,
+    });
+    await compileJs('src/web-worker', 'web-worker.js', './build', {
+      minifiedName: `web-worker.js`,
+      includePolyfills: true,
+      minify: true,
+    });
+
+    const maxJs = fs.readFileSync('build/web-worker.max.js', 'utf-8');
+    const minJs = fs.readFileSync('build/web-worker.js', 'utf-8');
+    fs.writeFileSync('build/ww.max.js', `export workerJs = ${maxJs}`);
+    fs.writeFileSync('build/ww.js', `export workerJs = ${minJs}`);
+  }
+
   const filename = options.filename || name + '.js';
   await compileJs(
     path + '/',
@@ -510,16 +537,6 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
     }.js`;
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
-  }
-
-  if (name === 'amp-script') {
-    // Copy @ampproject/worker-dom/dist/amp/worker/worker.js to dist/ folder.
-    const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
-    const file = `dist/v0/amp-script-worker-${version}`;
-    // The "js" output is minified and transpiled to ES5.
-    fs.copyFileSync(dir + 'worker.js', `${file}.js`);
-    // The "mjs" output is unminified ES6 and has debugging flags enabled.
-    fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
   }
 }
 
