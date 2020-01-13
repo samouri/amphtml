@@ -20,11 +20,11 @@ import {dev, devAssert} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 
 import {workerJs as maxWorkerJs} from '../../build/ww.max.js';
-import {workerJs as minWorkerJs} from '../../build/ww.js';
+// import {workerJs as minWorkerJs} from '../../build/ww.js';
 
 let workerJs;
 if (getMode().minified) {
-  workerJs = minWorkerJs;
+  // workerJs = minWorkerJs;
 } else {
   workerJs = maxWorkerJs;
 }

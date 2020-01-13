@@ -489,23 +489,20 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
     fs.copyFileSync(dir + 'worker.js', `${file}.js`);
     // The "mjs" output is unminified ES6 and has debugging flags enabled.
     fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
-  } else if (name === 'amp-bind') {
+  } 
+  else if (name === 'amp-bind') {
     // Create an inlineable ww.js.
     await compileJs('src/web-worker', 'web-worker.js', './build', {
       toName: 'web-worker.max.js',
-      minifiedName: `web-worker.js`,
       includePolyfills: true,
-    });
-    await compileJs('src/web-worker', 'web-worker.js', './build', {
-      minifiedName: `web-worker.js`,
-      includePolyfills: true,
-      minify: true,
     });
 
+    // TODO(friedj): figure out how to also get the minified version.
+
     const maxJs = fs.readFileSync('build/web-worker.max.js', 'utf-8');
-    const minJs = fs.readFileSync('build/web-worker.js', 'utf-8');
-    fs.writeFileSync('build/ww.max.js', `export workerJs = ${maxJs}`);
-    fs.writeFileSync('build/ww.js', `export workerJs = ${minJs}`);
+    // const minJs = fs.readFileSync('build/web-worker.js', 'utf-8');
+    fs.writeFileSync('build/ww.max.js', `export const workerJs = ${JSON.stringify(maxJs)}`);
+    // fs.writeFileSync('build/ww.js', `export const workerJs = ${JSON.stringify(minJs)}`);
   }
 
   const filename = options.filename || name + '.js';
