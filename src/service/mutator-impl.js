@@ -211,7 +211,9 @@ export class MutatorImpl {
         const ampElements = element.getElementsByClassName('i-amphtml-element');
         for (let i = 0; i < ampElements.length; i++) {
           const r = Resource.forElement(ampElements[i]);
-          r.requestMeasure();
+          if (r) {
+            r.requestMeasure();
+          }
         }
         if (relayoutTop != -1) {
           this.resources_.setRelayoutTop(relayoutTop);
