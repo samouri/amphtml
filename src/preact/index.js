@@ -106,3 +106,7 @@ export function useLayoutEffect(effect, opt_deps) {
 export function useContext(context) {
   return hooks.useContext(context);
 }
+
+/** @type {{current: (null|IntersectionObserver)}} */ 
+const observerRef = useRef(null);
+observerRef.current = new IntersectionObserver(() => {});
