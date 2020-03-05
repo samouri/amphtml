@@ -545,15 +545,17 @@ export class Performance {
    */
   whenViewportLayoutComplete_() {
     const {documentElement} = this.win.document;
-    const size = Services.viewportForDoc(documentElement).getSize();
-    const rect = layoutRectLtwh(0, 0, size.width, size.height);
-    return this.resources_.whenFirstPass().then(() => {
-      return whenContentIniLoad(
-        documentElement,
-        this.win,
-        rect,
-        /* isInPrerender */ true
-      );
+    return Services.vsyncFor(this.win).runPromise(() => {
+      const size = Services.viewportForDoc(documentElement).getSize();
+      const rect = layoutRectLtwh(0, 0, size.width, size.height);
+      return this.resources_.whenFirstPass().then(() => {
+        return whenContentIniLoad(
+          documentElement,
+          this.win,
+          rect,
+          /* isInPrerender */ true
+        );
+      });
     });
   }
 
