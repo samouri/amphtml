@@ -667,7 +667,7 @@ actions that apply to the whole document.
   </tr>
   <tr>
     <td><code>goBack(navigate=BOOLEAN)</code></td>
-    <td>When navigate is false or unspecified, goBack will attempt to go back in history while remaining in the current document. When navigate is true, the action will allow for cross-document navigation, similarly to [history.back](https://developer.mozilla.org/en-US/docs/Web/API/History/back).</td>
+    <td>When navigate is false or unspecified, goBack will attempt to go back in history while remaining in the current document. When navigate is true, the action will allow for cross-document navigation, similar to [history.back](https://developer.mozilla.org/en-US/docs/Web/API/History/back).</td>
   </tr>
   <tr>
     <td><code>print</code></td>
