@@ -778,8 +778,8 @@ export class Resource {
     return this.withViewportDeferreds_[key].promise;
   }
 
-  /** @private resolves promises populated via whenWithinViewport. */
-  resolveDeferredsWhenWithinViewports_() {
+  /** resolves promises populated via whenWithinViewport. */
+  resolveDeferredsWhenWithinViewports() {
     if (!this.withViewportDeferreds_) {
       return;
     }
@@ -1037,11 +1037,7 @@ export class Resource {
    * @return {boolean}
    */
   isInViewport() {
-    const isInViewport = this.element.isInViewport();
-    if (isInViewport) {
-      this.resolveDeferredsWhenWithinViewports_();
-    }
-    return isInViewport;
+    return this.element.isInViewport();
   }
 
   /**

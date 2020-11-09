@@ -1500,6 +1500,10 @@ export class ResourcesImpl {
           // Remeasure can only update isDisplayed(), not in-viewport state.
           resource.measure();
         }
+
+        // TODO: reimplement whenWithinViewport to use InOb.
+        resource.resolveDeferredsWhenWithinViewports();
+
         // Check if the element has exited the viewport or the page has changed
         // visibility since the layout was scheduled.
         if (
@@ -1723,6 +1727,9 @@ export class ResourcesImpl {
         resource.getState()
       );
     }
+
+    // TODO: reimplement whenWithinViewport to use InOb.
+    resource.resolveDeferredsWhenWithinViewports();
     const forceOutsideViewport = opt_forceOutsideViewport || false;
     if (!this.isLayoutAllowed_(resource, forceOutsideViewport)) {
       return;
