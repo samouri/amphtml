@@ -231,25 +231,21 @@ export class ResourcesImpl {
     ) {
       const iframed = isIframed(this.win);
 
-      // Classic IntersectionObserver doesn't support viewport tracking and
-      // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
-      // supports it via {root: document}, which throws on other browsers.
+      // InOb cannot use rootMargin with implicit root in a crossorigin iframe.
+      // An iframed ampdoc always implies we are running within a full width/height
+      // iframe, so we can get by with tracking the document viewport instead.
       const root = /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
-        ? /** @type {*} */ (this.win.document)
+        ? this.win.document
         : null);
-      try {
-        this.intersectionObserver_ = new IntersectionObserver(
-          (e) => this.intersect(e),
-          // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
-          {root, rootMargin: '250% 31.25%'}
-        );
+      this.intersectionObserver_ = new IntersectionObserver(
+        (e) => this.intersect(e),
+        // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
+        {root, rootMargin: '250% 31.25%'}
+      );
 
-        // Wait for intersection callback instead of measuring all elements
-        // during the first pass.
-        this.relayoutAll_ = false;
-      } catch (e) {
-        dev().warn(TAG_, 'Falling back to classic Resources:', e);
-      }
+      // Wait for intersection callback instead of measuring all elements
+      // during the first pass.
+      this.relayoutAll_ = false;
     }
 
     // When user scrolling stops, run pass to check newly in-viewport elements.
