@@ -91,18 +91,7 @@ describe('amp-ad 3P', () => {
         });
         const {initialIntersection} = context;
         expect(initialIntersection.rootBounds).to.deep.equal(
-          layoutRectLtwh(
-            0,
-            0,
-            Math.min(
-              iframe.ownerDocument.body.clientWidth,
-              iframe.ownerDocument.defaultView.innerWidth
-            ),
-            Math.min(
-              iframe.ownerDocument.body.clientHeight,
-              iframe.ownerDocument.defaultView.innerHeight
-            )
-          )
+          layoutRectLtwh(0, 0, 500, 3000)
         );
 
         expect(initialIntersection.boundingClientRect).to.deep.equal(
