@@ -15,7 +15,6 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
@@ -62,13 +61,11 @@ import {
 } from '../../../src/friendly-iframe-embed';
 import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
-import {
-  intersectionEntryToJson,
-  measureIntersection,
-} from '../../../src/utils/intersection';
+import {intersectionEntryToJson} from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/core/types';
 
+import {getIntersectionChangeEntry} from '../../../src/utils/intersection-observer-3p-host.js';
 import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
@@ -300,9 +297,6 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
 
-    /** @private {Promise<!IntersectionObserverEntry>} */
-    this.initialIntersectionPromise_ = null;
-
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
      * uses safeframe when response header is not specified.
@@ -451,13 +445,6 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
-
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    this.initialIntersectionPromise_ = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /** @override */
@@ -2103,17 +2090,15 @@ export class AmpA4A extends AMP.BaseElement {
       this.sentinel
     );
 
-    return this.initialIntersectionPromise_.then((intersection) => {
-      contextMetadata['_context'][
-        'initialIntersection'
-      ] = intersectionEntryToJson(intersection);
-      return this.iframeRenderHelper_(
-        dict({
-          'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-          'name': JSON.stringify(contextMetadata),
-        })
-      );
-    });
+    contextMetadata['_context'][
+      'initialIntersection'
+    ] = intersectionEntryToJson(getIntersectionChangeEntry(this.element));
+    return this.iframeRenderHelper_(
+      dict({
+        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+        'name': JSON.stringify(contextMetadata),
+      })
+    );
   }
 
   /**
@@ -2180,22 +2165,21 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      return this.initialIntersectionPromise_.then((intersection) => {
-        contextMetadata['initialIntersection'] = intersectionEntryToJson(
-          intersection
-        );
-        if (method == XORIGIN_MODE.NAMEFRAME) {
-          contextMetadata['creative'] = creative;
-          name = JSON.stringify(contextMetadata);
-        } else if (method == XORIGIN_MODE.SAFEFRAME) {
-          contextMetadata = JSON.stringify(contextMetadata);
-          name =
-            `${this.safeframeVersion};${creative.length};${creative}` +
-            `${contextMetadata}`;
-        }
+      contextMetadata['initialIntersection'] = intersectionEntryToJson(
+        getIntersectionChangeEntry(this.element)
+      );
 
-        return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
-      });
+      if (method == XORIGIN_MODE.NAMEFRAME) {
+        contextMetadata['creative'] = creative;
+        name = JSON.stringify(contextMetadata);
+      } else if (method == XORIGIN_MODE.SAFEFRAME) {
+        contextMetadata = JSON.stringify(contextMetadata);
+        name =
+          `${this.safeframeVersion};${creative.length};${creative}` +
+          `${contextMetadata}`;
+      }
+
+      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
 

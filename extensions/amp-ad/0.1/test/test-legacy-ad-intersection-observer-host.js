@@ -38,9 +38,6 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
   let stubFireInOb;
 
   function getInObEntry() {
-    const rootBounds = layoutRectLtwh(198, 299, 100, 100);
-    const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-    return getIntersectionChangeEntry(layoutBox, null, rootBounds);
   }
 
   function getIframe(src) {
@@ -72,6 +69,8 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
         },
       };
     };
+    element.getLayoutBox = () => ({});
+    element.getOwner = () => null;
 
     stubFireInOb = (host) => {
       let fireObserved = false;
