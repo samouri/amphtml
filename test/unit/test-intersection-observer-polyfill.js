@@ -20,9 +20,9 @@ import {
   getIntersectionChangeEntry,
   intersectionRatio,
 } from '../../src/utils/intersection-observer-3p-host';
+import {Services} from '../../src/services';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import {Services} from '../../src/services';
 
 const fakeAmpDoc = {
   getRootNode: () => {
@@ -142,7 +142,7 @@ describes.sandboxed('getIntersectionChangeEntry', {}, (env) => {
       intersectionRatio: 1,
     });
 
-    let element2 = {
+    const element2 = {
       getOwner: () => null,
       getLayoutBox: () => layoutRectLtwh(50, 200, 150, 200),
     };

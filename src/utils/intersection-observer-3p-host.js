@@ -15,10 +15,10 @@
  */
 
 import {MessageType} from '../3p-frame-messaging';
+import {Services} from '../services';
 import {SubscriptionApi} from '../iframe-helper';
 import {dict} from '../core/types/object';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
-import {Services} from '../services';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
