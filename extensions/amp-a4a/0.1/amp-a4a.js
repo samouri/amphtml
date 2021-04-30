@@ -64,7 +64,6 @@ import {installUrlReplacementsForEmbed} from '../../../src/service/url-replaceme
 import {intersectionEntryToJson} from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/core/types';
-
 import {getIntersectionChangeEntry} from '../../../src/utils/intersection-observer-3p-host.js';
 import {listenOnce} from '../../../src/event-helper';
 import {
