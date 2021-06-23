@@ -645,7 +645,7 @@ export class AmpDoc {
       } else {
         this.signals_.reset(AmpDocSignals.NEXT_VISIBLE);
       }
-      this.visibilityStateHandlers_.fire();
+      // this.visibilityStateHandlers_.fire();
     }
   }
 

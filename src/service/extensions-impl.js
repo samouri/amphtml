@@ -167,31 +167,31 @@ export class Extensions {
       this.extensions_[extensionKey(extensionId, LATEST_VERSION)] = holder;
     }
 
-    try {
       this.currentExtensionId_ = extensionId;
       this.currentExtensionVersion_ = version;
       this.currentExtensionLatest_ = latest;
-      factory(arg, arg['_']);
-      if (getMode(this.win).localDev || getMode(this.win).test) {
-        if (Object.freeze) {
-          const m = holder.extension;
-          m.elements = Object.freeze(m.elements);
-          holder.extension = Object.freeze(m);
+      factory(arg, arg['_']).then(() => {
+        if (getMode(this.win).localDev || getMode(this.win).test) {
+          if (Object.freeze) {
+            const m = holder.extension;
+            m.elements = Object.freeze(m.elements);
+            holder.extension = Object.freeze(m);
+          }
         }
-      }
-      holder.loaded = true;
-      holder.resolve?.(holder.extension);
-      latestHolder?.resolve?.(holder.extension);
-    } catch (e) {
-      holder.error = e;
-      holder.reject?.(e);
-      latestHolder?.reject?.(e);
-      throw e;
-    } finally {
-      this.currentExtensionId_ = null;
-      this.currentExtensionVersion_ = null;
-      this.currentExtensionLatest_ = null;
-    }
+        holder.loaded = true;
+        holder.resolve?.(holder.extension);
+        latestHolder?.resolve?.(holder.extension);
+      }).catch((e) => {
+        holder.error = e;
+        holder.reject?.(e);
+        latestHolder?.reject?.(e);
+        throw e;
+
+      }).then(() => {
+        this.currentExtensionId_ = null;
+        this.currentExtensionVersion_ = null;
+        this.currentExtensionLatest_ = null;
+      })
   }
 
   /**
